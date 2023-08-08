@@ -16,6 +16,7 @@ jobs:
  # 第二步：打包构建
       - name: Build
         uses: actions/setup-node@master
+      - run: npm init -y
       - run: npm install # 安装第三方包
       - run: npm run build # 打包
       - run: tar -zcvf release.tgz .nuxt static nuxt.config.js package.json package-lock.json pm2.config.json
