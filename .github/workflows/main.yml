@@ -1,53 +1,47 @@
-name: Publish And Deploy Demo
+name: Run YOLOv5 Model Transformation
 
 on:
   push:
-    
+    branches:
+      - main
 
 jobs:
-  build-and-deploy:
+  run:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2.3.1
-      with:
-        persist-credentials: false
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
+      - name: Set up Docker
+        uses: docker/setup-docker@v2
 
-    - name: Pull Docker Image
-      run:  docker pull sophgo/tpuc_dev:latest  
-            
-    - name: Run Docker Container
-      run: docker run --privileged --name myname -v $PWD:/workspace -it sophgo/tpuc_dev:latest
-           cd tpu-mlir
-           source ./envsetup.sh
-           ./build.sh
+      - name: Run YOLOv5 Model Transformation
+        run: |
+          docker run --privileged --name myname -v $PWD:/workspace -it sophgo/tpuc_dev:latest
+          cd tpu-mlir
+          source ./envsetup.sh
+          ./build.sh
 
+          mkdir model_yolov5s && cd model_yolov5s
+          cp ${REGRESSION_PATH}/model/yolov5s.onnx .
+          cp -rf ${REGRESSION_PATH}/dataset/COCO2017 .
+          cp -rf ${REGRESSION_PATH}/image .
+          mkdir workspace && cd workspace
 
-           mkdir model_yolov5s && cd model_yolov5s
-           cp ${REGRESSION_PATH}/model/yolov5s.onnx .
-           cp -rf ${REGRESSION_PATH}/dataset/COCO2017 .
-           cp -rf ${REGRESSION_PATH}/image .
-           mkdir workspace && cd workspace
+          model_transform.py \
+            --model_name yolov5s \
+            --model_def ../yolov5s.onnx \
+            --input_shapes [[1,3,640,640]] \
+            --mean 0.0,0.0,0.0 \
+            --scale 0.0039216,0.0039216,0.0039216 \
+            --keep_aspect_ratio \
+            --pixel_format rgb \
+            --output_names 350,498,646 \
+            --test_input ../image/dog.jpg \
+            --test_result yolov5s_top_outputs.npz \
+            --mlir yolov5s.mlir
 
-           model_transform.py \
-              --model_name yolov5s \
-              --model_def ../yolov5s.onnx \
-              --input_shapes [[1,3,640,640]] \
-              --mean 0.0,0.0,0.0 \
-              --scale 0.0039216,0.0039216,0.0039216 \
-              --keep_aspect_ratio \
-              --pixel_format rgb \
-              --output_names 350,498,646 \
-              --test_input ../image/dog.jpg \
-              --test_result yolov5s_top_outputs.npz \
-              --mlir yolov5s.mlir
-
-    
-
-
-   
           
 
 
