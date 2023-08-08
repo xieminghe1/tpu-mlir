@@ -18,7 +18,7 @@ jobs:
 
       - name: Run YOLOv5 Model Transformation
         run: |
-          docker run --privileged --name github_actions_test -v $PWD:/workspace -it sophgo/tpuc_dev:latest
+          docker exec --privileged --name github_actions_test -v $PWD:/workspace -it sophgo/tpuc_dev:latest
 
           
           cd tpu-mlir
