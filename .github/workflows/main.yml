@@ -18,7 +18,7 @@ jobs:
         uses: actions/setup-node@master
       - run: npm init -y
       - run: npm run build --if-present # 打包
-      - run: tar -zcvf release.tgz .nuxt static nuxt.config.js package.json package-lock.json pm2.config.json
+      - run: tar -zcvf release.tgz  package.json 
       # 把.nuxt、nuxt.config.js等文件，打包压缩为release.tgz
 
     # 第三步：发布 Release
