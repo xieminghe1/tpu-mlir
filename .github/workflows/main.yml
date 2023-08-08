@@ -24,6 +24,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+
       - name: Run Docker Container
         run: |
           docker run --privileged --name github_actions_test -v $PWD:/workspace sophgo/tpuc_dev:latest
