@@ -2,8 +2,7 @@ name: Run YOLOv5 Model Transformation
 
 on:
   push:
-   
-      
+  
 
 jobs:
   run:
