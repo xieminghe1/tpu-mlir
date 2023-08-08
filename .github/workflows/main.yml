@@ -19,9 +19,12 @@ jobs:
       - name: Run YOLOv5 Model Transformation
         run: |
           docker run --privileged --name myname -v $PWD:/workspace -it sophgo/tpuc_dev:latest
+
+          
           cd tpu-mlir
           source ./envsetup.sh
           ./build.sh
+
 
           mkdir model_yolov5s && cd model_yolov5s
           cp ${REGRESSION_PATH}/model/yolov5s.onnx .
