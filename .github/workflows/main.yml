@@ -6,19 +6,15 @@ on:
 
 jobs:
   run:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-      - name: Clean up existing Docker packages
-        run: |
-          sudo apt-get remove docker docker-engine docker.io containerd runc
-          sudo apt-get update
-
-
+     
       - name: Set up Docker
         run: |
+           sudo apt-get update
            sudo apt install docker.io
            sudo systemctl start docker
            sudo systemctl enable docker
