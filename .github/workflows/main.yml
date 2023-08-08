@@ -2,8 +2,7 @@ name: Reuse Docker Image
 
 on:
   push:
-    branches:
-      - main
+ 
 
 jobs:
   reuse_image:
