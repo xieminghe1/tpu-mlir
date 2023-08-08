@@ -16,14 +16,12 @@ jobs:
         run: |
           docker pull sophgo/tpuc_dev:latest
 
- 
 
       - name: Run Docker Container
         run: |
-          docker run --privileged --name github_actions_test -v $PWD:/workspace sophgo/tpuc_dev:latest
-          # 在容器中执行其他命令
+          docker run --privileged --name github_actions_test -v $PWD:/workspace sophgo/tpuc_dev:latest bash -c '
 
-          
+      
           cd tpu-mlir
           source ./envsetup.sh
           ./build.sh
@@ -47,6 +45,9 @@ jobs:
             --test_input ../image/dog.jpg \
             --test_result yolov5s_top_outputs.npz \
             --mlir yolov5s.mlir
+
+
+
 
           
 
