@@ -11,10 +11,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+      - name: Clean up existing Docker packages
+        run: |
+          sudo apt-get remove docker docker-engine docker.io containerd runc
+          sudo apt-get update
+
 
       - name: Set up Docker
         run: |
-          sudo apt-get update
           sudo apt-get install -y docker.io
 
       - name: Run YOLOv5 Model Transformation
