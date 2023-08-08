@@ -12,6 +12,30 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+
+ # 第二步：打包构建
+      - name: Build
+        uses: actions/setup-node@master
+      - run: npm install # 安装第三方包
+      - run: npm run build # 打包
+      - run: tar -zcvf release.tgz .nuxt static nuxt.config.js package.json package-lock.json pm2.config.json
+      # 把.nuxt、nuxt.config.js等文件，打包压缩为release.tgz
+
+    # 第三步：发布 Release
+      - name: Create Release # 创建Release，可以在仓库看到一个个版本
+        id: create_release
+        uses: actions/create-release@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }} # 之前GitHub添加的Token
+        with:
+          tag_name: ${{ github.ref }} # (tag)标签名称
+          release_name: Release ${{ github.ref }}
+          draft: false # 是否是草稿
+          prerelease: false # 是否是预发布
+
+
+        
+
       - name: Set up Docker
         run: |
           docker pull sophgo/tpuc_dev:latest
