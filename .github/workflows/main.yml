@@ -16,14 +16,7 @@ jobs:
         run: |
           docker pull sophgo/tpuc_dev:latest
 
-  run_commands:
-    runs-on: ubuntu-latest
-    needs: reuse_image
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
+ 
 
       - name: Run Docker Container
         run: |
