@@ -3,7 +3,7 @@ name: Tpu-mlir Regression Testing
 on:
   push:
       tags:
-         - 'v*'  # 以 'v' 开头的任何标签
+         - 'v*.*.*'  # 以 'v' 开头的任何标签
 
 
 jobs:
@@ -16,7 +16,7 @@ jobs:
 
  # 第二步：打包构建
       - name: Build release
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@master
       - run: | 
              npm init -y
              npm run build --if-present # 打包
