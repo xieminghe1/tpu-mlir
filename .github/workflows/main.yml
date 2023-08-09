@@ -50,7 +50,6 @@ jobs:
           source ./envsetup.sh
           ./build.sh
 
-
           mkdir model_yolov5s && cd model_yolov5s
           cp ${REGRESSION_PATH}/model/yolov5s.onnx .
           cp -rf ${REGRESSION_PATH}/dataset/COCO2017 .
