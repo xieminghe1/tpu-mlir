@@ -15,11 +15,12 @@ jobs:
 
 
  # 第二步：打包构建
-      - name: Build
-        uses: actions/setup-node@master
-      - run: npm init -y
-      - run: npm run build --if-present # 打包
-      - run: tar -zcvf release.tgz  package.json 
+      - name: Build release
+        uses: actions/setup-node@v1
+      - run: | 
+             npm init -y
+             npm run build --if-present # 打包
+             tar -zcvf release.tgz  package.json 
       # 把.nuxt、nuxt.config.js等文件，打包压缩为release.tgz
 
     # 第三步：发布 Release
@@ -35,12 +36,12 @@ jobs:
           prerelease: false # 是否是预发布
 
 
-      - name: Set up Docker
+      - name: Pull Docker images
         run: |
           docker pull sophgo/tpuc_dev:latest
 
 
-      - name: Run Docker Container
+      - name: Run Docker Container and YOLOv5 Test
         run: |
           docker run --privileged --name github_actions_test -v $PWD:/workspace sophgo/tpuc_dev:latest bash -c '
 
