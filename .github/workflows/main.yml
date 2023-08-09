@@ -1,43 +1,47 @@
 name: Tpu-mlir Regression Testing
 
+
+
 on:
+  workflow_run:
+    workflows: ["<other-workflow-name>"]
+    types:
+      - completed
+
+      
   push:
       tags:
          - 'v*.*.*'  # 以 'v' 开头的任何标签
 
-
 jobs:
-  reuse_image:
+  trigger_latest_workflow:
+    if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-
-
-
+    
     steps:
+      - name: Trigger Latest Workflow
+        uses: actions/github-script@v4
+        with:
+          script: |
+            // 获取最新的 workflow 文件名
+            const latestWorkflow = await github.actions.listRepoWorkflows({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 1,
+              page: 1
+            });
+            const latestWorkflowName = latestWorkflow.data.workflows[0].name;
+
+            // 触发最新的 workflow
+            await github.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: latestWorkflowName
+            });
       - name: Checkout repository
         uses: actions/checkout@v2
 
- # 第二步：打包构建
-      - name: Build
-        uses: actions/setup-node@master
-      - run: npm init -y
-      - run: npm run build --if-present # 打包
-      - run: tar -zcvf release.tgz  package.json 
-      # 把.nuxt、nuxt.config.js等文件，打包压缩为release.tgz
-
-
-    # 第三步：发布 Release
-      - name: Create Release # 创建Release，可以在仓库看到一个个版本
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }} # 之前GitHub添加的Token
-        with:
-          tag_name: ${{ github.ref }} # (tag)标签名称
-          release_name: Release ${{ github.ref }}
-          draft: false # 是否是草稿
-          prerelease: false # 是否是预发布
-
-
+        
       - name: Pull Docker images
         run: |
           docker pull sophgo/tpuc_dev:latest
@@ -72,8 +76,32 @@ jobs:
              --test_input ../image/dog.jpg \
              --test_result yolov5s_top_outputs.npz \
              --mlir yolov5s.mlir
+             '
 
-          '
+     
+
+ # 第二步：打包构建
+      - name: Build
+        uses: actions/setup-node@master
+      - run: npm init -y
+      - run: npm run build --if-present # 打包
+      - run: tar -zcvf release.tgz  package.json 
+      # 把.nuxt、nuxt.config.js等文件，打包压缩为release.tgz
+
+
+    # 第三步：发布 Release
+      - name: Create Release # 创建Release，可以在仓库看到一个个版本
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }} # 之前GitHub添加的Token
+        with:
+          tag_name: ${{ github.ref }} # (tag)标签名称
+          release_name: Release ${{ github.ref }}
+          draft: false # 是否是草稿
+          prerelease: false # 是否是预发布
+
+          
 
 
           
