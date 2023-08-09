@@ -3,7 +3,7 @@ name: Tpu-mlir Regression Testing
 on:
   push:
     tags:
-        - 'v*.*.*'  # 以 'v' 开头的标签名称，如 'v1.0.0'
+        - 'v*.*'  # 以 'v' 开头的标签名称，如 'v1.0.0'
 
 jobs:
   reuse_image:
