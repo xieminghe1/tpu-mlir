@@ -1,0 +1,101 @@
+name: Reuse Docker Image
+
+on:
+  push:
+    tags:
+        - 'v*.*.*'  # 以 'v' 开头的标签名称，如 'v1.0.0'
+
+jobs:
+  reuse_image:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+
+      - name: Set up Docker
+        run: |
+          docker pull sophgo/tpuc_dev:latest
+
+
+      - name: Run Docker Container
+        run: |
+          docker run --privileged --name github_actions_test -v $PWD:/workspace sophgo/tpuc_dev:latest bash -c '
+
+      
+          cd tpu-mlir
+          source ./envsetup.sh
+          ./build.sh
+
+
+          mkdir model_yolov5s && cd model_yolov5s
+          cp ${REGRESSION_PATH}/model/yolov5s.onnx .
+          cp -rf ${REGRESSION_PATH}/dataset/COCO2017 .
+          cp -rf ${REGRESSION_PATH}/image .
+          mkdir workspace && cd workspace
+          
+          ########### Model to MLIR ###############
+          
+          model_transform.py \
+             --model_name yolov5s \
+             --model_def ../yolov5s.onnx \
+             --input_shapes [[1,3,640,640]] \
+             --mean 0.0,0.0,0.0 \
+             --scale 0.0039216,0.0039216,0.0039216 \
+             --keep_aspect_ratio \
+             --pixel_format rgb \
+             --output_names 350,498,646 \
+             --test_input ../image/dog.jpg \
+             --test_result yolov5s_top_outputs.npz \
+             --mlir yolov5s.mlir
+
+          ############ MLIR to F16 bmodel ##########
+          
+          model_deploy.py \
+             --mlir yolov5s.mlir \
+             --quantize F16 \
+             --chip bm1684x \
+             --test_input yolov5s_in_f32.npz \
+             --test_reference yolov5s_top_outputs.npz \
+             --model yolov5s_1684x_f16.bmodel
+             
+           ############ MLIR to int8 bmodel ##########
+           
+          run_calibration.py yolov5s.mlir \
+              --dataset ../COCO2017 \
+              --input_num 100 \
+              -o yolov5s_cali_table
+
+          model_deploy.py \
+              --mlir yolov5s.mlir \
+              --quantize INT8 \
+              --calibration_table yolov5s_cali_table \
+              --chip bm1684x \
+              --test_input yolov5s_in_f32.npz \
+              --test_reference yolov5s_top_outputs.npz \
+              --tolerance 0.85,0.45 \
+              --model yolov5s_1684x_int8.bmodel
+
+
+
+              
+       # 第二步：打包构建
+      - name: Build
+        uses: actions/setup-node@master
+      - run: npm init -y
+      - run: npm run build --if-present # 打包
+      - run: tar -zcvf release.tgz  package.json 
+      # 把.nuxt、nuxt.config.js等文件，打包压缩为release.tgz
+
+       # 第三步：发布 Release
+      - name: Create Release # 创建Release，可以在仓库看到一个个版本
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }} # 之前GitHub添加的Token
+        with:
+          tag_name: ${{ github.ref }} # (tag)标签名称
+          release_name: Release ${{ github.ref }}
+          draft: false # 是否是草稿
+          prerelease: false # 是否是预发布
