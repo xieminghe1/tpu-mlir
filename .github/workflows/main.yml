@@ -2,7 +2,9 @@ name: Tpu-mlir Regression Testing
 
 on:
   push:
-   
+      tags:
+         - 'v*'  # 以 'v' 开头的任何标签
+
 
 jobs:
   reuse_image:
