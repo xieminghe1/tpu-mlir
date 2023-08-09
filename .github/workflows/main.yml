@@ -2,9 +2,8 @@ name: Tpu-mlir Regression Testing
 
 on:
   push:
-      tags:
-         - 'v*.*.*'  # 以 'v' 开头的任何标签
 
+      
 
 jobs:
   reuse_image:
@@ -32,8 +31,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }} # 之前GitHub添加的Token
         with:
-          tag_name: ${{ github.ref }} # (tag)标签名称
-          release_name: Release ${{ github.ref }}
+          release_name: Release ${{ }}
           draft: false # 是否是草稿
           prerelease: false # 是否是预发布
 
