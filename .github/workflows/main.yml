@@ -1,4 +1,4 @@
-name: Reuse Docker Image
+name: Regression Test
 
 on:
   push:
