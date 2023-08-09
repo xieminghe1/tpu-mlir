@@ -2,7 +2,8 @@ name: Reuse Docker Image
 
 on:
   push:
- 
+    tags:
+        - 'v*.*.*'  # 以 'v' 开头的标签名称，如 'v1.0.0'
 
 jobs:
   reuse_image:
@@ -24,7 +25,7 @@ jobs:
     # 第三步：发布 Release
       - name: Create Release # 创建Release，可以在仓库看到一个个版本
         id: create_release
-        uses: actions/create-release@master
+        uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }} # 之前GitHub添加的Token
         with:
@@ -33,8 +34,6 @@ jobs:
           draft: false # 是否是草稿
           prerelease: false # 是否是预发布
 
-
-    
 
       - name: Set up Docker
         run: |
